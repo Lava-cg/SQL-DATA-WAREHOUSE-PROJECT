@@ -18,36 +18,18 @@ Usage Example:
 */
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS
 BEGIN
-	DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME; 
-	BEGIN TRY
-		SET @batch_start_time = GETDATE();
-		PRINT '================================================';
-		PRINT 'Loading Bronze Layer';
-		PRINT '================================================';
+	TRUNCATE TABLE bronze.crm_cust_info;
+	PRINT '>> Inserting Data Into: bronze.crm_cust_info';
+	BULK INSERT bronze.crm_cust_info
+	FROM 'C:\sql\dwh_project\datasets\source_crm\cust_info.csv'
+	WITH (
+		FIRSTROW = 2,
+		FIELDTERMINATOR = ',',
+		TABLOCK
+	);
 
-		PRINT '------------------------------------------------';
-		PRINT 'Loading CRM Tables';
-		PRINT '------------------------------------------------';
-
-		SET @start_time = GETDATE();
-		PRINT '>> Truncating Table: bronze.crm_cust_info';
-		TRUNCATE TABLE bronze.crm_cust_info;
-		PRINT '>> Inserting Data Into: bronze.crm_cust_info';
-		BULK INSERT bronze.crm_cust_info
-		FROM 'C:\sql\dwh_project\datasets\source_crm\cust_info.csv'
-		WITH (
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ',',
-			TABLOCK
-		);
-		SET @end_time = GETDATE();
-		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
-		PRINT '>> -------------';
-
-        SET @start_time = GETDATE();
-		PRINT '>> Truncating Table: bronze.crm_prd_info';
+       
 		TRUNCATE TABLE bronze.crm_prd_info;
-
 		PRINT '>> Inserting Data Into: bronze.crm_prd_info';
 		BULK INSERT bronze.crm_prd_info
 		FROM 'C:\sql\dwh_project\datasets\source_crm\prd_info.csv'
